@@ -108,13 +108,22 @@ for (condition in condition_folders) {
       }  
     }
     total <- do.call(rbind, df_list)
-    
+
     total$Movement <- ifelse(total$velocity <= 0.02, "Stationary", "Moving")
     total$Movement <- as.factor(total$Movement)
     total$Movement <- factor(total$Movement, levels=c("Moving", "Stationary"))
     total$Name <- name
     
     total_full <- rbind(total_full,total)
+    
+    # Stop number count to add to info
+    df_stop_count <- na.omit(total[total$Movement=="Stationary",]) %>% group_by(TrackID) %>% dplyr::summarise(count(Movement))
+    df_stop_count <- df_stop_count[c("TrackID", "freq")]
+    colnames(df_stop_count) <- c("ID", "Stop_count")
+    
+    # Time spent not moving to add to info
+    df_stop_time <- na.omit(total[total$Movement=="Stationary",]) %>% group_by(TrackID) %>% dplyr::summarise(sum(delta_time))
+    colnames(df_stop_time) <- c("ID", "Time_stopped")
     
     # cbp <- col_gradient(nlevels(total$TrackID)) #gradient colors for tracks
     # cbp <- append(cbp, c("#adb5bd", "#000000")) #add colors for "Moving" and "Stationary"
@@ -147,7 +156,10 @@ for (condition in condition_folders) {
     df_imaris_collect$ID <- as.factor(df_imaris_collect$ID)
     df_imaris_collect$Velocity <- df_imaris_collect$`Track Displacement Length`/df_imaris_collect$`Track Duration`
     df_imaris_collect$Processivity <- df_imaris_collect$`Track Displacement Length`/df_imaris_collect$`Track Length`
+    df_imaris_collect$Speed <- df_imaris_collect$`Track Length`/df_imaris_collect$`Track Duration`
     df_imaris_collect$Name <- name
+    df_imaris_collect <- merge(df_imaris_collect,df_stop_count,by="ID") 
+    df_imaris_collect <- merge(df_imaris_collect,df_stop_time,by="ID") 
     
     df_imaris_collect_full <- rbind(df_imaris_collect_full,df_imaris_collect)
   }
