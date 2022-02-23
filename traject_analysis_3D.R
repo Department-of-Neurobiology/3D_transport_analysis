@@ -50,6 +50,7 @@ for (condition in condition_folders) {
   filenames <- Sys.glob(file.path("*.xlsx"))
   total_full <- data.frame()
   df_imaris_collect_full <- data.frame()
+  df_displ_collect_full <- data.frame()
   
   for (x in filenames){  
     #x <-"250220_m1w1s2_2_imaris_seg2.xlsx"
@@ -162,9 +163,22 @@ for (condition in condition_folders) {
     df_imaris_collect <- merge(df_imaris_collect,df_stop_time,by="ID") 
     
     df_imaris_collect_full <- rbind(df_imaris_collect_full,df_imaris_collect)
+
+    
+    # Collect displacement coordinates for direction evaluation
+    df_disp_pos <- read_excel(x, sheet = "Displacement Delta", skip = 1)
+    df_disp_pos$TrackID <- as.factor(df_disp_pos$TrackID)
+    df_disp_pos$Time_s <- df_disp_pos$Time*frame_rate/1000
+    df_disp_pos <- df_disp_pos[c("TrackID", "Displacement Delta X", "Displacement Delta Y", "Displacement Delta Z", "Time", "Time_s")]
+    df_disp_pos$Name <- name
+    total <- total[order(total$Time_s),]
+    total <- total[order(total$TrackID),]
+    #df_disp_pos$TrackID <- sub("^", "ID", df_disp_pos$TrackID)
+    df_displ_collect_full <- rbind(df_displ_collect_full,df_disp_pos)
   }
   write.table(total_full, paste("../positions_", condition, ".csv", sep=""), sep = ";",dec = '.', row.names = FALSE, col.names = TRUE)
   write.table(df_imaris_collect_full, paste("../imaris_collect_", condition, ".csv", sep=""), sep = ";",dec = '.', row.names = FALSE, col.names = TRUE)
+  write.table(df_displ_collect_full, paste("../df_displ_", condition, ".csv", sep=""), sep = ";",dec = '.', row.names = FALSE, col.names = TRUE)
 }
   
   

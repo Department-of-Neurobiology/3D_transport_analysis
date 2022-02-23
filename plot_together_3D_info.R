@@ -167,3 +167,7 @@ p_stop_time <- ggplot(df_for_plot_mean,aes(x=Condition,y=Time_stopped)) + #, tex
                      ref.group = "B6")
 p_stop_time
 ggsave(p_stop_time, filename = paste("mean_stop_time_for_0.2processive_per_dendrite.png", sep=""), type = "cairo", width = 4, height = 5)
+
+
+processive_IDs <- data_merge_info$ID[data_merge_info$Processivity >= 0.2]
+write.table(processive_IDs, "processive_IDs.csv", sep = ";",dec = '.', row.names = FALSE, col.names = TRUE)
