@@ -114,22 +114,32 @@ df_transform_1$distance_sign <- as.numeric(df_transform_1$distance_sign)
 df_transform_1$motion <- as.factor(df_transform_1$motion)
 df_transform_1$disp_length <- NA
 
+#create an empty list to store the split dataframes
 df_list <- list()
+#split the dataframe df_transform_1 by the column 'TrackID' and store it in the df_list
 df_list <- split(df_transform_1, df_transform_1$TrackID)
+#loop through the list of dataframes
 for(i in 1:length(df_list)){
+  #loop through each row of the current dataframe
   for (j in 1:nrow(df_list[[i]])) {
     #print(j)
+    #check if the current row is the first row
     if (j==1) {
+      #if it is the first row, assign NA to the 'disp_length' column
       df_list[[i]]$disp_length[[j]] <- NA
       next
     }
+    #check if the current row is the second row
     if (j==2) {
+      #if it is the second row, assign the value of 'distance_sign' to the 'disp_length' column
       df_list[[i]]$disp_length[[j]] <- df_list[[i]]$distance_sign[[j]]
     } else {
+      #if it is not the first or second row, add the value of 'distance_sign' to the previous value in 'disp_length' column
       df_list[[i]]$disp_length[[j]] <- df_list[[i]]$disp_length[[j-1]] + df_list[[i]]$distance_sign[[j]]
     }
   }
 }
+#recombine the list of dataframes into a single dataframe
 df_transform <- do.call(rbind, df_list)
 
 df_transform <- na.omit(df_transform)
